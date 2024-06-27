@@ -1,3 +1,8 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "plugins": ["enforce-cleanup"],
+  "rules": {
+    "enforce-cleanup/implement-cleanup": "error",
+    "enforce-cleanup/call-cleanup": "error"
+  }
 }
