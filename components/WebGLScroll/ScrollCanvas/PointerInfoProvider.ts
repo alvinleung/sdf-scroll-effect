@@ -1,4 +1,4 @@
-import { CleanupProtocol } from "../../../../utils/CleanupProtocol";
+import CleanupProtocol from "cleanup-protocol";
 
 export class PointerInfoProvider implements CleanupProtocol {
   private _isMouseDown = false;
@@ -19,6 +19,7 @@ export class PointerInfoProvider implements CleanupProtocol {
     window.addEventListener("pointerup", this.handlePointerUp.bind(this));
     window.addEventListener("pointermove", this.handlePointerMove.bind(this));
 
+    // eslint-disable-next-line enforce-cleanup/call-cleanup
     this._resizeObserver = new ResizeObserver(this.handleResize.bind(this));
     this._resizeObserver.observe(this._canvas);
   }
