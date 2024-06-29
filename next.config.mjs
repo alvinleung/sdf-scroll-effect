@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // DANGEROUS
-  // React strict mode causes double instaniation of the Object
+  // React strict mode may causes double instaniation of the Object
   reactStrictMode: true,
   swcMinify: true,
   webpack: (config) => {

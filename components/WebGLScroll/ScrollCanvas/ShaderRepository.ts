@@ -17,7 +17,8 @@ export class ShaderRepository implements CleanupProtocol {
   getProgram(
     gl: OGLRenderingContext,
     vertex: string,
-    fragment: string
+    fragment: string,
+    uniforms: { [key: string]: { value: any } } = {}
   ): Program {
     const hash = fragment + vertex;
     if (this._compiled[hash]) {
@@ -26,6 +27,7 @@ export class ShaderRepository implements CleanupProtocol {
     const program = new Program(gl, {
       vertex,
       fragment,
+      uniforms,
     });
     this._compiled[hash] = program;
     return program;

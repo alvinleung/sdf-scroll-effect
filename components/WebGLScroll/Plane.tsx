@@ -2,7 +2,6 @@
 
 import React, { MutableRefObject, RefObject, useEffect, useRef } from "react";
 import { PlaneObject } from "./ScrollCanvas";
-import { Program } from "ogl";
 import { useScrollItemList } from "./WebGLScrollContainer";
 import { useVirtualScroll } from "./VirtualScroll";
 import { useWindowSize } from "usehooks-ts";
@@ -10,11 +9,17 @@ import { useWindowSize } from "usehooks-ts";
 type Props = {
   vertexShader?: string;
   fragmentShader?: string;
+  uniforms?: {
+    [key: string]: {
+      value: any;
+    };
+  };
 };
 
 const Plane = ({
   fragmentShader,
   vertexShader,
+  uniforms,
   children,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & Props) => {
@@ -43,12 +48,17 @@ const Plane = ({
     if (!itemRef.current) return;
     const bounds = itemRef.current.getBoundingClientRect();
     planeObject.current.setPlaneDOMDimension({
-      width,
-      height,
+      width: bounds.width,
+      height: bounds.height,
       left: bounds.left,
       top: bounds.top - scroll.getCurrent(),
     });
   }, [width, height, scroll]);
+
+  useEffect(() => {
+    if (!planeObject.current || !uniforms) return;
+    planeObject.current.setUniforms(uniforms);
+  }, [uniforms]);
 
   return (
     <div ref={itemRef} {...props}>

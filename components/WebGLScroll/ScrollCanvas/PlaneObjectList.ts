@@ -1,9 +1,7 @@
 import CleanupProtocol from "cleanup-protocol";
 import { PlaneObject } from "./PlaneObject";
-import { Mesh, OGLRenderingContext, Plane, Program, Transform } from "ogl";
-import { ShaderRepository } from "./ShaderRepository";
-import DEFAULT_FRAG from "./Shaders/Default.frag";
-import DEFAULT_VERT from "./Shaders/Default.vert";
+import { OGLRenderingContext, Transform } from "ogl";
+import { AnimatedValue } from "./AnimatedValue/AnimatedValue";
 
 export class PlaneObjectList implements CleanupProtocol {
   private _planes: PlaneObject[] = [];
@@ -18,9 +16,9 @@ export class PlaneObjectList implements CleanupProtocol {
     return plane;
   }
 
-  update(gl: OGLRenderingContext, scene: Transform) {
+  update(gl: OGLRenderingContext, scene: Transform, scroll: AnimatedValue) {
     for (let i = 0; i < this._planes.length; i++) {
-      this._planes[i].update(gl, scene);
+      this._planes[i].update(gl, scene, scroll);
     }
   }
   delete(plane: PlaneObject) {
