@@ -1,5 +1,5 @@
 import CleanupProtocol from "cleanup-protocol";
-import { Camera, Mesh, Plane, Program, Renderer, Transform } from "ogl";
+import { Camera, Vec3, Plane, Program, Renderer, Transform, Vec2 } from "ogl";
 import { PointerInfoProvider } from "./PointerInfoProvider";
 import { PlaneObjectList } from "./PlaneObjectList";
 
@@ -9,6 +9,7 @@ interface ScrollCanvasConfig {
   canvas: HTMLCanvasElement;
   items: PlaneObjectList;
   scroll: AnimatedValue;
+  contentElm: HTMLDivElement;
 }
 
 export class ScrollCanvas implements CleanupProtocol {
@@ -21,10 +22,12 @@ export class ScrollCanvas implements CleanupProtocol {
   private shouldUpdate = true;
   private animFrame = 0;
   private scroll: AnimatedValue;
+  private contentElm: HTMLDivElement;
 
-  constructor({ canvas, items, scroll }: ScrollCanvasConfig) {
+  constructor({ canvas, items, scroll, contentElm }: ScrollCanvasConfig) {
     this.items = items;
     this.scroll = scroll;
+    this.contentElm = contentElm;
 
     const renderer = new Renderer({ canvas });
     const gl = renderer.gl;
@@ -33,7 +36,7 @@ export class ScrollCanvas implements CleanupProtocol {
     // init the scene
     const camera = new Camera(gl);
     camera.position.z = this.getCameraPositionThatFillUpTheScreen(camera);
-    camera.position.y = -0.5;
+    camera.position.y = -.5;
 
     this.camera = camera;
     this.resizeToWindow();
@@ -64,11 +67,38 @@ export class ScrollCanvas implements CleanupProtocol {
   }
 
   private update(time: number) {
-    this.items.update(this.renderer.gl, this.scene, this.scroll);
+    const worldScroll = this.screenYToWorldY(this.scroll.getCurrent(), this.camera.position.z, 0, this.camera.fov, window.innerHeight);
+
+    this.items.update(this.renderer.gl, this.scene, worldScroll + .5);
     this.renderer.render({ scene: this.scene, camera: this.camera });
+
+    // Update the DOM element
+    this.contentElm.style.transform = `translateY(${this.scroll.getCurrent()}px)`;
 
     if (!this.shouldUpdate) return;
     this.animFrame = requestAnimationFrame(this.update.bind(this));
+  }
+
+  private screenYToWorldY(
+    yScreen: number,
+    zWorld: number,
+    zCamera: number,
+    fovY: number,
+    screenHeight: number
+  ): number {
+    // Convert FOV from degrees to radians
+    const fovYRad = (fovY * Math.PI) / 180;
+
+    // Calculate the focal length
+    const f = (screenHeight / 2) / Math.tan(fovYRad / 2);
+
+    // Adjust screen y to center it (assuming origin at top-left corner)
+    const yScreenCentered = yScreen - (screenHeight / 2);
+
+    // Apply the perspective transformation formula
+    const yWorld = yScreenCentered * zWorld / f;
+
+    return yWorld;
   }
 
   cleanup(): void {

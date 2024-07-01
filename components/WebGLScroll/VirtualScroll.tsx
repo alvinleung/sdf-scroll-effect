@@ -50,6 +50,7 @@ export const VirtualScrollProvider = ({
       const clampedPos = clamp(newPos, -maxScroll, 0);
       virtualScrollValue.lerpTo(clampedPos, 0.24);
     };
+
     window.addEventListener("wheel", handleWheel);
     return () => {
       window.removeEventListener("wheel", handleWheel);

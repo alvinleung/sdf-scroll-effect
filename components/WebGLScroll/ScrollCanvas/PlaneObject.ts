@@ -52,6 +52,9 @@ export class PlaneObject implements CleanupProtocol {
       // eslint-disable-next-line enforce-cleanup/call-cleanup
       value: new Vec2(0, 0),
     },
+    uScroll: {
+      value: 0
+    }
   };
 
   setProgram({
@@ -75,12 +78,11 @@ export class PlaneObject implements CleanupProtocol {
     this._needUpdateMesh = true;
   }
 
-  update(gl: OGLRenderingContext, scene: Transform, scroll: AnimatedValue) {
+  update(gl: OGLRenderingContext, scene: Transform, scroll: number) {
     // ========================================================================
     // COMPILE SHADERS
     // ========================================================================
     if (this._needUpdateShader) {
-      // TODO: add custom unifroms for the shader program
       this._program = ShaderRepository.instance.getProgram(
         gl,
         this._vertex,
@@ -143,6 +145,9 @@ export class PlaneObject implements CleanupProtocol {
       // switch the update flag off so that it won't run on next loop
       this._needUpdateMesh = false;
     }
+
+    // make sure scroll is updated to the latest scroll
+    this._planeUniforms.uScroll.value = scroll;
   }
 
   cleanup(): void { }

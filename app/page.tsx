@@ -36,7 +36,46 @@ export default function Home() {
         >
           test
         </Plane>
-        <Plane>test</Plane>
+        <Plane className="mx-12 my-24 text-black p-4">test</Plane>
+        <Plane
+          fragmentShader={CUSTOM_FRAG}
+          uniforms={{ color: { value: colorVal.current } }}
+          className="h-64"
+        >
+          test
+        </Plane>
+        <Plane className="mx-12 my-24 text-black p-4">test</Plane>
+        <Plane
+          fragmentShader={CUSTOM_FRAG}
+          uniforms={{ color: { value: colorVal.current } }}
+          className="h-64"
+        >
+          test
+        </Plane>
+        <Plane className="mx-12 my-24 text-black p-4">test</Plane>
+        <Plane
+          fragmentShader={CUSTOM_FRAG}
+          uniforms={{ color: { value: colorVal.current } }}
+          className="h-64"
+        >
+          test
+        </Plane>
+        <Plane className="mx-12 my-24 text-black p-4">test</Plane>
+        <Plane
+          fragmentShader={CUSTOM_FRAG}
+          uniforms={{ color: { value: colorVal.current } }}
+          className="h-64"
+        >
+          test
+        </Plane>
+        <Plane className="mx-12 my-24 text-black p-4">test</Plane>
+        <Plane
+          fragmentShader={CUSTOM_FRAG}
+          uniforms={{ color: { value: colorVal.current } }}
+          className="h-64"
+        >
+          test
+        </Plane>
       </WebGLScrollContainer>
     </main>
   );

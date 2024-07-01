@@ -16,9 +16,9 @@ export class PlaneObjectList implements CleanupProtocol {
     return plane;
   }
 
-  update(gl: OGLRenderingContext, scene: Transform, scroll: AnimatedValue) {
+  update(gl: OGLRenderingContext, scene: Transform, uScroll: number) {
     for (let i = 0; i < this._planes.length; i++) {
-      this._planes[i].update(gl, scene, scroll);
+      this._planes[i].update(gl, scene, uScroll);
     }
   }
   delete(plane: PlaneObject) {
