@@ -12,7 +12,7 @@ uniform mat4 projectionMatrix;
 varying vec2 vUv;
 
 void main() {
-  vUv = uv;
-  vec3 newPosition = position + vec3(uPlaneOffset.x, uPlaneOffset.y - uScroll, 0.0);
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+    vUv = uv;
+    vec3 newPosition = position + vec3(uPlaneOffset.x, uPlaneOffset.y - uScroll, 0.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
 }

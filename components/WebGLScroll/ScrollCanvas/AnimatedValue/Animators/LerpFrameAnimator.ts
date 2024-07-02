@@ -1,4 +1,4 @@
-import { CleanupProtocol } from "../../../../../utils/CleanupProtocol";
+import CleanupProtocol from "cleanup-protocol";
 import { AnimationState } from "../AnimatedValue";
 import { FrameAnimator } from "./FrameAnimator";
 
@@ -35,5 +35,5 @@ export class LerpFrameAnimator implements CleanupProtocol, FrameAnimator {
     return true;
   }
 
-  cleanup(): void {}
+  cleanup(): void { }
 }

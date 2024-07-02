@@ -116,9 +116,10 @@ export class PlaneObject implements CleanupProtocol {
       const geomWorldHeight = geomWorldWidth / planeAspect;
 
       const offsetYVH = this._domDimension.top / window.innerHeight;
+      const offsetXVW = this._domDimension.left / window.innerWidth;
 
       this._planeUniforms.uPlaneOffset.value = new Vec2(
-        0,
+        (offsetXVW + planeVW / 2 - .5) * screenAspect,
         -offsetYVH - geomWorldHeight / 2
       );
 

@@ -36,7 +36,7 @@ export class ScrollCanvas implements CleanupProtocol {
     // init the scene
     const camera = new Camera(gl);
     camera.position.z = this.getCameraPositionThatFillUpTheScreen(camera);
-    camera.position.y = -.5;
+    camera.position.y = -0.5;
 
     this.camera = camera;
     this.resizeToWindow();
@@ -67,9 +67,15 @@ export class ScrollCanvas implements CleanupProtocol {
   }
 
   private update(time: number) {
-    const worldScroll = this.screenYToWorldY(this.scroll.getCurrent(), this.camera.position.z, 0, this.camera.fov, window.innerHeight);
+    const worldScroll = this.screenYToWorldY(
+      this.scroll.getCurrent(),
+      this.camera.position.z,
+      0,
+      this.camera.fov,
+      window.innerHeight
+    );
 
-    this.items.update(this.renderer.gl, this.scene, worldScroll + .5);
+    this.items.update(this.renderer.gl, this.scene, worldScroll + 0.5);
     this.renderer.render({ scene: this.scene, camera: this.camera });
 
     // Update the DOM element
@@ -90,13 +96,13 @@ export class ScrollCanvas implements CleanupProtocol {
     const fovYRad = (fovY * Math.PI) / 180;
 
     // Calculate the focal length
-    const f = (screenHeight / 2) / Math.tan(fovYRad / 2);
+    const f = screenHeight / 2 / Math.tan(fovYRad / 2);
 
     // Adjust screen y to center it (assuming origin at top-left corner)
-    const yScreenCentered = yScreen - (screenHeight / 2);
+    const yScreenCentered = yScreen - screenHeight / 2;
 
     // Apply the perspective transformation formula
-    const yWorld = yScreenCentered * zWorld / f;
+    const yWorld = (yScreenCentered * zWorld) / f;
 
     return yWorld;
   }
