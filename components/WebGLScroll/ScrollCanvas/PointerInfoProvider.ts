@@ -1,9 +1,10 @@
 import CleanupProtocol from "cleanup-protocol";
+import { Vec2 } from "ogl";
 
 export class PointerInfoProvider implements CleanupProtocol {
   private _isMouseDown = false;
-  private _mousePosition = { x: 0, y: 0 };
-  private _mousePositionNormalized = { x: 0, y: 0 };
+  private _mousePosition = new Vec2();
+  private _mousePositionNormalized = new Vec2();
   private _canvas: HTMLCanvasElement;
   private _canvasWidth: number = 0;
   private _canvasHeight: number = 0;
@@ -41,23 +42,18 @@ export class PointerInfoProvider implements CleanupProtocol {
   }
 
   private handlePointerMove(e: MouseEvent) {
-    this._mousePosition = {
-      x: e.clientX - this._canvasLeft,
-      y: e.clientY - this._canvasTop,
-    };
-    this._mousePositionNormalized = {
-      x: this._mousePosition.x / this._canvasWidth,
-      y: this._mousePosition.y / this._canvasHeight,
-    };
+    this._mousePosition.x = e.clientX - this._canvasLeft;
+    this._mousePosition.y = e.clientY - this._canvasTop;
+
+    this._mousePositionNormalized.x = (this._mousePosition.x / window.innerWidth) * 2 - 1;
+    this._mousePositionNormalized.y = -(this._mousePosition.y / window.innerHeight) * 2 + 1;
   }
 
   private handleResize() {
     this.updateCanvasDimensions();
     // Recalculate normalized position based on the new size if needed
-    this._mousePositionNormalized = {
-      x: this._mousePosition.x / this._canvasWidth,
-      y: this._mousePosition.y / this._canvasHeight,
-    };
+    this._mousePositionNormalized.x = (this._mousePosition.x / window.innerWidth) * 2 - 1;
+    this._mousePositionNormalized.y = -(this._mousePosition.y / window.innerHeight) * 2 + 1;
   }
 
   get isMouseDown() {

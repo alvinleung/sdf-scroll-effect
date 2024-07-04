@@ -1,9 +1,21 @@
 import CleanupProtocol from "cleanup-protocol";
-import { Camera, Vec3, Plane, Program, Renderer, Transform, Vec2 } from "ogl";
+import { Camera, Mat4, Mesh, Plane, Program, Renderer, Transform, Vec2, Vec3, Vec4 } from "ogl";
 import { PointerInfoProvider } from "./PointerInfoProvider";
 import { PlaneObjectList } from "./PlaneObjectList";
 
+import DEFAULT_FRAG from "./Shaders/Default.frag";
+import CURSOR_VERT from "./Shaders/Cursor.vert";
+
 import { AnimatedValue } from "./AnimatedValue/AnimatedValue";
+import { Status } from "status-hud";
+import { DebugCursor } from "./DebugCursor";
+
+export interface ScrollCanvasRenderingInfo {
+  uMouseWorld: Vec3;
+  uScroll: number;
+  uMouse: Vec2;
+  camera: Camera;
+}
 
 interface ScrollCanvasConfig {
   canvas: HTMLCanvasElement;
@@ -67,15 +79,33 @@ export class ScrollCanvas implements CleanupProtocol {
   }
 
   private update(time: number) {
+    // prepare scroll value
     const worldScroll = this.screenYToWorldY(
       this.scroll.getCurrent(),
       this.camera.position.z,
-      0,
       this.camera.fov,
       window.innerHeight
     );
 
-    this.items.update(this.renderer.gl, this.scene, worldScroll + 0.5);
+
+    // prepare mouse-in-world value
+    const ndcZ = worldZToNDCZ(this.pointer.positionNormalized, 0, this.camera);
+    const pointerWorldPosition = new Vec3(
+      this.pointer.positionNormalized.x,
+      this.pointer.positionNormalized.y,
+      ndcZ
+    );
+    this.camera.unproject(pointerWorldPosition);
+
+    // assemble the overall-uniforms and render info for plane objects
+    const info: ScrollCanvasRenderingInfo = {
+      uMouseWorld: pointerWorldPosition,
+      uScroll: worldScroll + .5,
+      uMouse: this.pointer.positionNormalized,
+      camera: this.camera
+    }
+
+    this.items.update(this.renderer.gl, this.scene, info);
     this.renderer.render({ scene: this.scene, camera: this.camera });
 
     // Update the DOM element
@@ -88,7 +118,6 @@ export class ScrollCanvas implements CleanupProtocol {
   private screenYToWorldY(
     yScreen: number,
     zWorld: number,
-    zCamera: number,
     fovY: number,
     screenHeight: number
   ): number {
@@ -114,4 +143,22 @@ export class ScrollCanvas implements CleanupProtocol {
     this.shouldUpdate = false;
     this.pointer.cleanup();
   }
+}
+
+
+function worldZToNDCZ(ndcPosition2D: Vec2, zWorld: number, camera: Camera): number {
+  // Creating a Vector3 in world space
+  const point = new Vec3(ndcPosition2D.x, ndcPosition2D.y, zWorld);
+
+  // Transform the point from world space to view space
+  point.applyMatrix4(camera.viewMatrix);
+
+  // Now the point is in view space, proceed to transform it to clip space
+  const clipSpacePoint = point.clone();
+  clipSpacePoint.applyMatrix4(camera.projectionMatrix);
+
+  // Normalize to NDC
+  const ndcZ = clipSpacePoint.z / 1.0;
+
+  return ndcZ;
 }

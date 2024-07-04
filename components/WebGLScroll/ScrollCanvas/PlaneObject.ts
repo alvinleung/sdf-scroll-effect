@@ -6,12 +6,17 @@ import {
   Program,
   Transform,
   Vec2,
+  Vec3,
 } from "ogl";
 import { PlaneObjectList } from "./PlaneObjectList";
 import DEFAULT_FRAG from "./Shaders/Default.frag";
 import DEFAULT_VERT from "./Shaders/Default.vert";
 import { ShaderRepository } from "./ShaderRepository";
 import { AnimatedValue } from "./AnimatedValue/AnimatedValue";
+import { PointerInfoProvider } from "./PointerInfoProvider";
+import { ScrollCanvasRenderingInfo } from "./ScrollCanvas";
+import { InfoLogger } from "@/utils/InfoLogger";
+import { Status } from "status-hud";
 
 export interface PlaneDOMDimension {
   left: number;
@@ -19,6 +24,14 @@ export interface PlaneDOMDimension {
   width: number;
   height: number;
 }
+
+interface PlaneWorldDimension {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface ProgramSource {
   vertex: string;
   fragment: string;
@@ -31,6 +44,8 @@ type Uniforms = {
   };
 };
 export class PlaneObject implements CleanupProtocol {
+  private static planeObjectCount = 0;
+
   private _needUpdateMesh: boolean = true;
   private _needUpdateShader: boolean = true;
   private _mesh: Mesh | undefined;
@@ -49,13 +64,30 @@ export class PlaneObject implements CleanupProtocol {
   private _customUniforms: Uniforms = {};
   private _planeUniforms: Uniforms = {
     uPlaneOffset: {
-      // eslint-disable-next-line enforce-cleanup/call-cleanup
       value: new Vec2(0, 0),
     },
     uScroll: {
-      value: 0
+      value: 0,
+    },
+    uMouseWorld: {
+      value: new Vec3(0, 0, 0),
+    },
+    uMouse: {
+      value: new Vec2(0, 0),
+    },
+    uMouseUv: {
+      value: new Vec2(0, 0),
+    },
+    uPlaneAspect: {
+      value: 1
     }
   };
+
+  private id = 0;
+  constructor() {
+    this.id = PlaneObject.planeObjectCount;
+    PlaneObject.planeObjectCount++;
+  }
 
   setProgram({
     vertex = DEFAULT_VERT,
@@ -78,7 +110,11 @@ export class PlaneObject implements CleanupProtocol {
     this._needUpdateMesh = true;
   }
 
-  update(gl: OGLRenderingContext, scene: Transform, scroll: number) {
+  update(
+    gl: OGLRenderingContext,
+    scene: Transform,
+    info: ScrollCanvasRenderingInfo
+  ) {
     // ========================================================================
     // COMPILE SHADERS
     // ========================================================================
@@ -119,7 +155,7 @@ export class PlaneObject implements CleanupProtocol {
       const offsetXVW = this._domDimension.left / window.innerWidth;
 
       this._planeUniforms.uPlaneOffset.value = new Vec2(
-        (offsetXVW + planeVW / 2 - .5) * screenAspect,
+        (offsetXVW + planeVW / 2 - 0.5) * screenAspect,
         -offsetYVH - geomWorldHeight / 2
       );
 
@@ -148,7 +184,23 @@ export class PlaneObject implements CleanupProtocol {
     }
 
     // make sure scroll is updated to the latest scroll
-    this._planeUniforms.uScroll.value = scroll;
+    this._planeUniforms.uScroll.value = info.uScroll;
+    this._planeUniforms.uMouse.value = info.uMouse;
+    this._planeUniforms.uPlaneAspect.value =
+      this._domDimension.width / this._domDimension.height;
+
+    const screenAspect = window.innerWidth / window.innerHeight;
+    const planeOffset: Vec2 = this._planeUniforms.uPlaneOffset.value;
+    const planeVW = this._domDimension.width / window.innerWidth;
+    const planeVH = this._domDimension.height / window.innerHeight;
+    const uMouseUv: Vec2 = this._planeUniforms.uMouseUv.value;
+
+    const UVToWorldWidthScale = 1 / planeVW / screenAspect;
+    const UVToWorldHeightScale = 1 / planeVH;
+    uMouseUv.x = (planeOffset.x - info.uMouseWorld.x) * UVToWorldWidthScale;
+    uMouseUv.y =
+      (planeOffset.y - info.uMouseWorld.y - info.uScroll) *
+      UVToWorldHeightScale;
   }
 
   cleanup(): void { }

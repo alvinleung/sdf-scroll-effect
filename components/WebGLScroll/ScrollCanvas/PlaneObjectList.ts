@@ -1,7 +1,7 @@
 import CleanupProtocol from "cleanup-protocol";
 import { PlaneObject } from "./PlaneObject";
 import { OGLRenderingContext, Transform } from "ogl";
-import { AnimatedValue } from "./AnimatedValue/AnimatedValue";
+import { ScrollCanvasRenderingInfo } from "./ScrollCanvas";
 
 export class PlaneObjectList implements CleanupProtocol {
   private _planes: PlaneObject[] = [];
@@ -16,9 +16,9 @@ export class PlaneObjectList implements CleanupProtocol {
     return plane;
   }
 
-  update(gl: OGLRenderingContext, scene: Transform, uScroll: number) {
+  update(gl: OGLRenderingContext, scene: Transform, info: ScrollCanvasRenderingInfo) {
     for (let i = 0; i < this._planes.length; i++) {
-      this._planes[i].update(gl, scene, uScroll);
+      this._planes[i].update(gl, scene, info);
     }
   }
   delete(plane: PlaneObject) {
