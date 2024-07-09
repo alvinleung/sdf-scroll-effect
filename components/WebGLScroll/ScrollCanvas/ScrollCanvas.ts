@@ -3,9 +3,6 @@ import { Camera, Mat4, Mesh, Plane, Program, Renderer, Transform, Vec2, Vec3, Ve
 import { PointerInfoProvider } from "./PointerInfoProvider";
 import { PlaneObjectList } from "./PlaneObjectList";
 
-import DEFAULT_FRAG from "./Shaders/Default.frag";
-import CURSOR_VERT from "./Shaders/Cursor.vert";
-
 import { AnimatedValue } from "./AnimatedValue/AnimatedValue";
 import { Status } from "status-hud";
 import { DebugCursor } from "./DebugCursor";

@@ -1,4 +1,4 @@
-import { CleanupProtocol } from "../../../../utils/CleanupProtocol";
+import CleanupProtocol from "cleanup-protocol";
 import { AnimationState } from "./AnimatedValue";
 import { FrameAnimator } from "./Animators/FrameAnimator";
 

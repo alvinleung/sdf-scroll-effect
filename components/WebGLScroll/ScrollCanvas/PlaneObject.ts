@@ -6,28 +6,16 @@ import {
   Program,
   Transform,
   Vec2,
-  Vec3,
 } from "ogl";
-import { PlaneObjectList } from "./PlaneObjectList";
 import DEFAULT_FRAG from "./Shaders/Default.frag";
 import DEFAULT_VERT from "./Shaders/Default.vert";
 import { ShaderRepository } from "./ShaderRepository";
-import { AnimatedValue } from "./AnimatedValue/AnimatedValue";
-import { PointerInfoProvider } from "./PointerInfoProvider";
 import { ScrollCanvasRenderingInfo } from "./ScrollCanvas";
-import { InfoLogger } from "@/utils/InfoLogger";
-import { Status } from "status-hud";
+import { LazyTexture } from "./LazyTexture";
 
 export interface PlaneDOMDimension {
   left: number;
   top: number;
-  width: number;
-  height: number;
-}
-
-interface PlaneWorldDimension {
-  x: number;
-  y: number;
   width: number;
   height: number;
 }
@@ -43,6 +31,9 @@ type Uniforms = {
     value: any;
   };
 };
+
+const VERBOSE = false;
+
 export class PlaneObject implements CleanupProtocol {
   private static planeObjectCount = 0;
 
@@ -69,9 +60,6 @@ export class PlaneObject implements CleanupProtocol {
     uScroll: {
       value: 0,
     },
-    uMouseWorld: {
-      value: new Vec3(0, 0, 0),
-    },
     uMouse: {
       value: new Vec2(0, 0),
     },
@@ -79,7 +67,10 @@ export class PlaneObject implements CleanupProtocol {
       value: new Vec2(0, 0),
     },
     uPlaneAspect: {
-      value: 1
+      value: 1,
+    },
+    uResolution: {
+      value: new Vec2(0, 0),
     }
   };
 
@@ -128,6 +119,8 @@ export class PlaneObject implements CleanupProtocol {
       this._needUpdateShader = false;
     }
 
+    // load texture into the program
+
     if (this._program === undefined) {
       throw "Program is not initiated";
     }
@@ -171,7 +164,21 @@ export class PlaneObject implements CleanupProtocol {
         // swap out uniform before render
         const shaderUniforms = renderInfo.mesh.program.uniforms;
         for (const key in this._customUniforms) {
-          shaderUniforms[key] = this._customUniforms[key];
+          const uniform = this._customUniforms[key];
+          if (!uniform) {
+            VERBOSE && console.warn(`Uniform ${key} is empty`);
+            continue;
+          }
+          if (typeof uniform.value === "undefined") {
+            VERBOSE && console.warn(`Rendering with empty uniform "${key}"`);
+            continue;
+          }
+          // Lazy init the texture
+          if (uniform.value instanceof LazyTexture) {
+            shaderUniforms[key].value = uniform.value.getTexture(gl);
+            continue;
+          }
+          shaderUniforms[key] = uniform;
         }
         // inject the offset uniforms
         for (const key in this._planeUniforms) {
@@ -188,6 +195,8 @@ export class PlaneObject implements CleanupProtocol {
     this._planeUniforms.uMouse.value = info.uMouse;
     this._planeUniforms.uPlaneAspect.value =
       this._domDimension.width / this._domDimension.height;
+    this._planeUniforms.uResolution.value.x = window.innerWidth;
+    this._planeUniforms.uResolution.value.y = window.innerHeight;
 
     const screenAspect = window.innerWidth / window.innerHeight;
     const planeOffset: Vec2 = this._planeUniforms.uPlaneOffset.value;

@@ -8,6 +8,7 @@ import CUSTOM_FRAG from "../components/WebGLScroll/ScrollCanvas/Shaders/Custom.f
 import { Vec4 } from "ogl";
 import { useEffect, useRef } from "react";
 import CaseStudies from "@/components/CaseStudies/CaseStudies";
+import AssetManagerProvider from "@/components/AssetManager/AssetManagerContext";
 
 export default function Home() {
   // eslint-disable-next-line enforce-cleanup/call-cleanup
@@ -24,10 +25,12 @@ export default function Home() {
     };
   }, []);
   return (
-    <WebGLScrollContainer>
-      <main>
-        <CaseStudies />
-      </main>
-    </WebGLScrollContainer>
+    <AssetManagerProvider>
+      <WebGLScrollContainer>
+        <main className="cursor-none">
+          <CaseStudies />
+        </main>
+      </WebGLScrollContainer>
+    </AssetManagerProvider>
   );
 }
